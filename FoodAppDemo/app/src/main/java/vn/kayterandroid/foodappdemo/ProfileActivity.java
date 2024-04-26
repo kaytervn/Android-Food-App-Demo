@@ -32,6 +32,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import vn.kayterandroid.foodappdemo.dao.CartItemDatabase;
 import vn.kayterandroid.foodappdemo.utils.APIService;
 import vn.kayterandroid.foodappdemo.utils.RealPathUtil;
 import vn.kayterandroid.foodappdemo.utils.RetrofitClient;
@@ -60,24 +61,17 @@ public class ProfileActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     try {
                         String json = response.body().string();
-                        JsonObject userObject = new Gson().fromJson(json, JsonObject.class)
-                                .getAsJsonObject("user");
+                        JsonObject userObject = new Gson().fromJson(json, JsonObject.class).getAsJsonObject("user");
                         textName.setText(userObject.get("name").getAsString());
                         textEmail.setText(userObject.get("email").getAsString());
                         textPassword.setText(userObject.get("password").getAsString());
                         if (userObject.get("image").getAsString().length() > 0) {
-                            Glide.with(getApplicationContext())
-                                    .load(userObject.get("image").getAsString())
-                                    .into(imagePicture);
+                            Glide.with(getApplicationContext()).load(userObject.get("image").getAsString()).into(imagePicture);
                         }
                         buttonUpload.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                ImagePicker.Companion.with(ProfileActivity.this)
-                                        .crop()
-                                        .compress(512)
-                                        .maxResultSize(200, 200)
-                                        .start();
+                                ImagePicker.Companion.with(ProfileActivity.this).crop().compress(512).maxResultSize(200, 200).start();
                             }
                         });
                     } catch (IOException e) {
@@ -97,9 +91,20 @@ public class ProfileActivity extends AppCompatActivity {
         buttonLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SessionManager.getInstance(getApplicationContext()).clearLoginUser();
-                Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
-                startActivity(intent);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+                builder.setTitle("Đăng xuất").setMessage("Bạn có chắc muốn đăng xuất tài khoản không?")
+                        .setPositiveButton("Có", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                SessionManager.getInstance(getApplicationContext()).clearLoginUser();
+                                Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
+                                startActivity(intent);
+                            }
+                        }).setNegativeButton("Không", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            }
+                        }).show();
             }
         });
     }
@@ -120,10 +125,8 @@ public class ProfileActivity extends AppCompatActivity {
                         String realPath = RealPathUtil.getRealPath(ProfileActivity.this, uri);
                         File file = new File(realPath);
 
-                        RequestBody requestFile =
-                                RequestBody.create(MediaType.parse("multipart/form-data"), file);
-                        MultipartBody.Part imagePart =
-                                MultipartBody.Part.createFormData("image", file.getName(), requestFile);
+                        RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+                        MultipartBody.Part imagePart = MultipartBody.Part.createFormData("image", file.getName(), requestFile);
 
                         apiService = RetrofitClient.getAPIService();
                         Call<ResponseBody> call = apiService.updateUser(id, imagePart);
