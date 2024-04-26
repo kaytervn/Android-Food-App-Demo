@@ -43,7 +43,7 @@ public class LoginActivity extends AppCompatActivity {
         String id = SessionManager.getInstance(getApplicationContext()).getId();
 
         if (id != "") {
-            Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
             startActivity(intent);
         }
 
@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
                         SessionManager.getInstance(getApplicationContext()).saveLoginUser(
                                 userObject.get("_id").getAsString()
                         );
-                        Intent intent = new Intent(LoginActivity.this, DashboardActivity.class);
+                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                         startActivity(intent);
                     } catch (IOException e) {
                         e.printStackTrace();

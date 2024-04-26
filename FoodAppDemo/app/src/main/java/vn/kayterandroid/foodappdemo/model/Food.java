@@ -20,6 +20,11 @@ public class Food {
     public Food() {
     }
 
+    public Food(String title) {
+        this.title = title;
+    }
+
+
     public Food(String id, String image, String title, float price, String description) {
         this.id = id;
         this.image = image;

@@ -6,6 +6,10 @@ android {
     namespace = "vn.kayterandroid.foodappdemo"
     compileSdk = 34
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     defaultConfig {
         applicationId = "vn.kayterandroid.foodappdemo"
         minSdk = 21
@@ -32,6 +36,7 @@ android {
 }
 
 dependencies {
+    implementation("com.github.smarteist:autoimageslider:1.4.0")
     implementation("androidx.room:room-runtime:2.5.1")
     annotationProcessor("androidx.room:room-compiler:2.5.1")
     implementation("com.github.dhaval2404:imagepicker:2.1")

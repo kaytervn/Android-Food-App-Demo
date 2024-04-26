@@ -25,7 +25,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
     List<CartItem> cartItems;
     OnItemClickListener listener;
 
-    public CartAdapter(CartActivity context, OnItemClickListener listener) {
+    public CartAdapter(Context context, OnItemClickListener listener) {
         this.context = context;
         this.listener = listener;
     }

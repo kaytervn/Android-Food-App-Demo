@@ -23,13 +23,17 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.MyViewHolder> 
     List<Food> listFoods;
     RecyclerViewClickListener listener;
 
+    public void setData(List<Food> foods) {
+        this.listFoods = foods;
+        notifyDataSetChanged();
+    }
+
     public interface RecyclerViewClickListener {
         void onItemClick(Food food);
     }
 
-    public FoodAdapter(Context context, List<Food> listFoods, RecyclerViewClickListener listener) {
+    public FoodAdapter(Context context, RecyclerViewClickListener listener) {
         this.context = context;
-        this.listFoods = listFoods;
         this.listener = listener;
     }
 

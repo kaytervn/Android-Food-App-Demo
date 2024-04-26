@@ -36,7 +36,6 @@ public class FoodDetailActivity extends AppCompatActivity {
     TextView textTitle, textPrice, textDescription;
     ImageView imagePicture;
     Button buttonAddToCart;
-    CartAdapter cartAdapter;
     String imageURL;
     Float price;
 
@@ -72,7 +71,8 @@ public class FoodDetailActivity extends AppCompatActivity {
                     1
             ));
         }
-        Intent intent = new Intent(FoodDetailActivity.this, CartActivity.class);
+        Intent intent = new Intent(FoodDetailActivity.this, HomeActivity.class);
+        intent.putExtra("tabIndex", 1);
         startActivity(intent);
     }
 

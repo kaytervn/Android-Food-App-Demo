@@ -10,15 +10,42 @@
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="243dp"
-        android:layout_marginTop="-30dp"
         android:src="@drawable/top_background" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imageView"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="6dp">
+
+        <com.smarteist.autoimageslider.SliderView
+            android:id="@+id/imageSlider"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            app:sliderAnimationDuration="600"
+            app:sliderAutoCycleDirection="back_and_forth"
+            app:sliderAutoCycleEnabled="true"
+            app:sliderIndicatorAnimationDuration="600"
+            app:sliderIndicatorGravity="center_horizontal|bottom"
+            app:sliderIndicatorMargin="15dp"
+            app:sliderIndicatorOrientation="horizontal"
+            app:sliderIndicatorPadding="3dp"
+            app:sliderIndicatorRadius="2dp"
+            app:sliderIndicatorSelectedColor="#5A5A5A"
+            app:sliderIndicatorUnselectedColor="#FFF"
+            app:sliderScrollTimeInSec="1"
+            app:sliderStartAutoCycle="true" />
+
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="40dp"
-        android:text="Welcome Back!"
+        android:text="Mừng bạn trở lại!"
         android:textColor="#FFFFFF"
         android:textSize="20dp" />
 
@@ -50,19 +77,23 @@
         android:id="@+id/recyclerViewFoods"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="220dp" />
+        android:layout_below="@id/cardView"
+        android:layout_centerHorizontal="true" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/buttonCart"
-        android:layout_width="wrap_content"
+    <EditText
+        android:id="@+id/editSearch"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:fabCustomSize="50dp"
-        android:layout_marginStart="300dp"
-        android:layout_marginTop="650dp"
-        android:backgroundTint="#FFED53"
-        android:clickable="true"
-        android:scaleX="1.5"
-        android:scaleY="1.5"
-        android:src="@drawable/baseline_add_shopping_cart_24" />
+        android:layout_below="@id/imagePicture"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="25dp"
+        android:drawableStart="@drawable/baseline_content_paste_search_24"
+        android:drawablePadding="10dp"
+        android:drawableTint="@color/white"
+        android:ems="10"
+        android:hint="Bạn đang tìm gì?"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:textColorHint="@color/white" />
 </RelativeLayout>

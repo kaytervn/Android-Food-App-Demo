@@ -13,6 +13,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import vn.kayterandroid.foodappdemo.model.Food;
 import vn.kayterandroid.foodappdemo.model.User;
 
 public interface APIService {
@@ -34,4 +35,7 @@ public interface APIService {
 
     @GET("foods/{id}")
     Call<ResponseBody> getFood(@Path("id") String foodId);
+
+    @POST("foods/search")
+    Call<ResponseBody> search(@Body Food foodTitle);
 }

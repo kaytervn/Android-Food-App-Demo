@@ -67,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 SessionManager.getInstance(getApplicationContext()).saveLoginUser(
                                         userObject.get("_id").getAsString()
                                 );
-                                Intent intent = new Intent(RegisterActivity.this, DashboardActivity.class);
+                                Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
                                 startActivity(intent);
                             } catch (IOException e) {
                                 e.printStackTrace();
