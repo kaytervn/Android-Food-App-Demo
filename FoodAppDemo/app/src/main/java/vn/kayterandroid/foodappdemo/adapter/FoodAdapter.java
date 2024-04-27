@@ -17,8 +17,10 @@ import java.util.List;
 import vn.kayterandroid.foodappdemo.R;
 import vn.kayterandroid.foodappdemo.model.Food;
 
-public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.MyViewHolder> {
+public class FoodAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    final int VIEW_TYPE_ITEM = 0;
+    final int VIEW_TYPE_LOADING = 1;
     Context context;
     List<Food> listFoods;
     RecyclerViewClickListener listener;
@@ -39,43 +41,33 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.MyViewHolder> 
 
     @NonNull
     @Override
-    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new MyViewHolder(LayoutInflater.from(context).inflate(R.layout.food_item_view, parent, false));
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_ITEM) {
+            View view = LayoutInflater.from(context).inflate(R.layout.food_item_view, parent, false);
+            return new FoodItemViewHolder(view, listener, listFoods);
+        } else {
+            View view = LayoutInflater.from(context).inflate(R.layout.food_loading_view, parent, false);
+            return new FoodLoadingViewHolder(view);
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.textTitle.setText(listFoods.get(position).getTitle());
-        Glide.with(context)
-                .load(listFoods.get(position).getImage())
-                .into(holder.imagePicture);
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof FoodItemViewHolder) {
+            ((FoodItemViewHolder) holder).textTitle.setText(listFoods.get(position).getTitle());
+            Glide.with(context)
+                    .load(listFoods.get(position).getImage())
+                    .into(((FoodItemViewHolder) holder).imagePicture);
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return this.listFoods.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
     }
 
     @Override
     public int getItemCount() {
-        return listFoods.size();
-    }
-
-    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-        ImageView imagePicture;
-        TextView textTitle;
-
-        public MyViewHolder(@NonNull View itemView) {
-            super(itemView);
-            imagePicture = itemView.findViewById(R.id.imagePicture);
-            textTitle = itemView.findViewById(R.id.textTitle);
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            if (listener != null) {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION) {
-                    listener.onItemClick(listFoods.get(position));
-                }
-            }
-        }
+        return this.listFoods == null ? 0 : listFoods.size();
     }
 }

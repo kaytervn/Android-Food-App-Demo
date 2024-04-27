@@ -2,17 +2,17 @@ package vn.kayterandroid.foodappdemo;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -26,8 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.smarteist.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType;
@@ -47,10 +45,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import vn.kayterandroid.foodappdemo.adapter.FoodAdapter;
 import vn.kayterandroid.foodappdemo.adapter.SliderAdapter;
-import vn.kayterandroid.foodappdemo.adapter.ViewPager2Adapter;
 import vn.kayterandroid.foodappdemo.databinding.ActivityDashboardBinding;
-import vn.kayterandroid.foodappdemo.databinding.ActivityProfileBinding;
 import vn.kayterandroid.foodappdemo.model.Food;
+import vn.kayterandroid.foodappdemo.model.getFoodsLazy;
 import vn.kayterandroid.foodappdemo.utils.APIService;
 import vn.kayterandroid.foodappdemo.utils.RetrofitClient;
 import vn.kayterandroid.foodappdemo.utils.SessionManager;
@@ -59,7 +56,7 @@ public class DashboardActivity extends Fragment implements FoodAdapter.RecyclerV
     APIService apiService;
     ImageView imagePicture;
     TextView textName;
-    List<Food> listFoods = new ArrayList<>();
+    List<Food> listFoods;
     FoodAdapter foodsAdapter;
     RecyclerView recyclerViewFoods;
     EditText editSearch;
@@ -68,6 +65,9 @@ public class DashboardActivity extends Fragment implements FoodAdapter.RecyclerV
     SliderAdapter sliderAdapter;
     ActivityDashboardBinding binding;
     Context context;
+    int currentPage = 1;
+    boolean isLoading = false;
+    boolean isLastPage = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -117,90 +117,40 @@ public class DashboardActivity extends Fragment implements FoodAdapter.RecyclerV
         }
     }
 
-    void getFoods() {
-        apiService = RetrofitClient.getAPIService();
-        Call<ResponseBody> call = apiService.getFoods();
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        String jsonString = response.body().string();
-                        JSONObject jsonObject = new JSONObject(jsonString);
-                        JSONArray foodsArray = jsonObject.getJSONArray("foods");
-                        for (int i = 0; i < foodsArray.length(); i++) {
-                            JSONObject foodObject = foodsArray.getJSONObject(i);
-                            listFoods.add(new Food(
-                                    foodObject.getString("_id"),
-                                    foodObject.getString("image"),
-                                    foodObject.getString("title"),
-                                    Float.parseFloat(foodObject.getString("price")),
-                                    foodObject.getString("description")
-                            ));
-                        }
-                        foodsAdapter = new FoodAdapter(context, DashboardActivity.this);
-                        foodsAdapter.setData(listFoods);
-                        recyclerViewFoods.setHasFixedSize(true);
-                        recyclerViewFoods.setLayoutManager(new GridLayoutManager(context, 2));
-                        recyclerViewFoods.setAdapter(foodsAdapter);
-                    } catch (JSONException | IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Toast.makeText(context, "Response Failed", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("Failed to call API", t.getMessage());
-            }
-        });
-    }
-
     void mapping() {
+        listFoods = new ArrayList<>();
         context = getActivity();
         sliderView = binding.imageSlider;
         imagePicture = binding.imagePicture;
         textName = binding.textName;
         recyclerViewFoods = binding.recyclerViewFoods;
-        editSearch = binding.editSearch;
-
-        editSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    searchFood();
-                }
-                return false;
-            }
-        });
     }
 
-    void searchFood() {
-        String searchText = editSearch.getText().toString().trim();
+    void getFoodsLazy() {
         apiService = RetrofitClient.getAPIService();
-        Call<ResponseBody> call = apiService.search(new Food(searchText));
+        Call<ResponseBody> call = apiService.searchLazyLoading(new getFoodsLazy(currentPage, 3));
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
-                        List<Food> filterFoods = new ArrayList<>();
                         String jsonString = response.body().string();
                         JSONObject jsonObject = new JSONObject(jsonString);
                         JSONArray foodsArray = jsonObject.getJSONArray("foods");
-                        for (int i = 0; i < foodsArray.length(); i++) {
-                            JSONObject foodObject = foodsArray.getJSONObject(i);
-                            filterFoods.add(new Food(
-                                    foodObject.getString("_id"),
-                                    foodObject.getString("image"),
-                                    foodObject.getString("title"),
-                                    Float.parseFloat(foodObject.getString("price")),
-                                    foodObject.getString("description")
-                            ));
+                        if (foodsArray.length() == 0) {
+                            isLastPage = true;
+                        } else {
+                            for (int i = 0; i < foodsArray.length(); i++) {
+                                JSONObject foodObject = foodsArray.getJSONObject(i);
+                                listFoods.add(new Food(
+                                        foodObject.getString("_id"),
+                                        foodObject.getString("image"),
+                                        foodObject.getString("title"),
+                                        Float.parseFloat(foodObject.getString("price")),
+                                        foodObject.getString("description")
+                                ));
+                            }
                         }
-                        listFoods = filterFoods;
                     } catch (JSONException | IOException e) {
                         e.printStackTrace();
                     }
@@ -218,16 +168,6 @@ public class DashboardActivity extends Fragment implements FoodAdapter.RecyclerV
                 Log.d("Failed to call API", t.getMessage());
             }
         });
-        hideSoftKeyboard();
-    }
-
-    void hideSoftKeyboard() {
-        try {
-            InputMethodManager inputMethodManager = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(requireView().getWindowToken(), 0);
-        } catch (NullPointerException ex) {
-            ex.printStackTrace();
-        }
     }
 
     @Override
@@ -237,17 +177,7 @@ public class DashboardActivity extends Fragment implements FoodAdapter.RecyclerV
         startActivity(intent);
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(
-            @NonNull LayoutInflater inflater,
-            @Nullable ViewGroup container,
-            @Nullable Bundle savedInstanceState) {
-        binding = ActivityDashboardBinding.inflate(inflater, container, false);
-        mapping();
-        getUser();
-        getFoods();
-
+    void initSlider() {
         imageList = new ArrayList<>();
         imageList.add(R.drawable.shopee1);
         imageList.add(R.drawable.shopee2);
@@ -262,6 +192,62 @@ public class DashboardActivity extends Fragment implements FoodAdapter.RecyclerV
         sliderView.setIndicatorUnselectedColor(Color.GRAY);
         sliderView.startAutoCycle();
         sliderView.setScrollTimeInSec(5);
+    }
+
+    void initFoodsView() {
+        foodsAdapter = new FoodAdapter(context, DashboardActivity.this);
+        foodsAdapter.setData(listFoods);
+        recyclerViewFoods.setHasFixedSize(false);
+        recyclerViewFoods.setLayoutManager(new GridLayoutManager(context, 2));
+        recyclerViewFoods.setAdapter(foodsAdapter);
+        recyclerViewFoods.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (!isLoading && !isLastPage) {
+                    if (layoutManager != null && layoutManager.findLastCompletelyVisibleItemPosition() == listFoods.size() - 1) {
+                        loadMoreData();
+                        isLoading = true;
+                    }
+                }
+            }
+        });
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        binding = ActivityDashboardBinding.inflate(inflater, container, false);
+        mapping();
+        getUser();
+        initSlider();
+        initFoodsView();
+        getFoodsLazy();
         return binding.getRoot();
+    }
+
+    void loadMoreData() {
+        List<Food> newfoods = new ArrayList<>();
+        newfoods.addAll(listFoods);
+        newfoods.add(null);
+        foodsAdapter.setData(newfoods);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                currentPage++;
+                getFoodsLazy();
+                isLoading = false;
+            }
+        }, 1000);
     }
 }

@@ -19,7 +19,7 @@ import vn.kayterandroid.foodappdemo.CartActivity;
 import vn.kayterandroid.foodappdemo.R;
 import vn.kayterandroid.foodappdemo.model.CartItem;
 
-public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> {
+public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemViewHolder> {
 
     Context context;
     List<CartItem> cartItems;
@@ -45,12 +45,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
 
     @NonNull
     @Override
-    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new MyViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.cart_item_view, parent, false));
+    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new ItemViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.cart_item_view, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         holder.bind(cartItems.get(position), listener);
         holder.textTitle.setText(cartItems.get(position).getTitle());
         holder.textQuantity.setText(String.valueOf(cartItems.get(position).getQuantity()));
@@ -65,7 +65,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
         return cartItems.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public class ItemViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imagePicture;
         TextView textTitle;
@@ -74,7 +74,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
         FloatingActionButton buttonDecrease, buttonIncrease, buttonDelete;
         TextView textQuantity;
 
-        public MyViewHolder(@NonNull View itemView) {
+        public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
             imagePicture = itemView.findViewById(R.id.imagePicture);
             textTitle = itemView.findViewById(R.id.textTitle);

@@ -15,6 +15,9 @@ public interface CartItemDAO {
     @Query("Select * from cartItems WHERE userId = :userId")
     List<CartItem> getAll(String userId);
 
+    @Query("SELECT * FROM cartItems WHERE LOWER(title) LIKE '%' || LOWER(:title) || '%'")
+    List<CartItem> findByTitle(String title);
+
     @Query("Select * from cartItems WHERE userId = :userId AND foodId = :foodId")
     CartItem getCartItem(String userId, String foodId);
 
