@@ -1,3 +1,5 @@
+![](https://github.com/kaytervn/Android-Food-App-Demo/blob/main/preview.gif)
+
 <h2>Food App Demo</h2>
 
 | Features                | Techniques Applied                                                                                 |
